@@ -1,5 +1,24 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+    <div id="allposts-page">
+        <div class="createpost-div">
+            <form action="POST">
+            {% csrf_token %}
+            {{ createform }}
+            <input class="create-btn-form btn btn-primary" type="submit" value="Submit">            
+            </form>
+        </div>
+    </div>
+    <div id="following-page">
+        <h3>Following Page</h3>
+    </div>
+    <div id="user-page">
+        <h3>{{request.user}} Page</h3>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/index.js' %}"></script>
 {% endblock %}

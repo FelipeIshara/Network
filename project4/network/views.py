@@ -1,12 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from .forms import CreatePostForm
 
-from .models import User
-
+from .models import User, Post
+import json
 
 def index(request):
     create_form = CreatePostForm()
@@ -15,7 +15,16 @@ def index(request):
     })
 
 def new_post(request):
-    pass
+    #convert json to dict
+    data = json.loads(request.body)
+    content = data.get("content")
+    owner = request.user
+    new_post = Post(
+        owner=owner,
+        content=content
+    )
+    new_post.save()
+    return JsonResponse({"message": f"{owner} post: {content}"}, status=201)
 
 
 def login_view(request):

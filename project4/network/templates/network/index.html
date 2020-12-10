@@ -4,8 +4,8 @@
 {% block body %}
     <div id="allposts-page">
         <div class="createpost-div">
-            <form action="POST">
-            {% csrf_token %}
+            <form id="newpost-form">
+            
             {{ createform }}
             <input class="create-btn-form btn btn-primary" type="submit" value="Submit">            
             </form>

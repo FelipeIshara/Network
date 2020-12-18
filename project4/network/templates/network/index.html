@@ -3,6 +3,7 @@
 
 {% block body %}
     <div id="allposts-page">
+        {% if user.is_authenticated %}
         <div class="createpost-div">
             <form id="newpost-form">
             
@@ -10,6 +11,7 @@
             <input class="create-btn-form btn btn-primary" type="submit" value="Submit">            
             </form>
         </div>
+        {% endif %}
         <div id="allposts-div">
             
         </div>
@@ -19,6 +21,9 @@
     </div>
     <div id="user-page">
         <h3>{{request.user}} Page</h3>
+    </div>
+    <div id="profile-page">
+        <h3 id="profileTitle"></h3>
     </div>
 {% endblock %}
 

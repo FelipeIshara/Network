@@ -20,20 +20,20 @@
                 </li>
                 {% endif %}  
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <button id="user" class="unstyle-btn nav-link"><strong>{{ user.username }}</strong></button>
-                    </li>
-                {% endif %}
+                <li class="nav-item">
+                    <button id="user" class="unstyle-btn nav-link"><strong>{{ user.username }}</strong></button>
+                </li>
+                
                 <li class="nav-item">
                     <button id="allposts" class=" unstyle-btn nav-link" >All Posts</button>
                 </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <button id="following" class="unstyle-btn nav-link" >Following</button>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                    </li>
+               
+                <li class="nav-item">
+                    <button id="following" class="unstyle-btn nav-link" >Following</button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                </li>
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Log In</a>

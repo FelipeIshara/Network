@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     // Use buttons to toggle between views
-    document.querySelector('#allposts').addEventListener('click', () => load_pagecontent('allposts'));
-    document.querySelector('#following').addEventListener('click', () => load_pagecontent('following'));
-    document.querySelector('#user').addEventListener('click', () => load_pagecontent('user'));
+    document.querySelector('#allposts').addEventListener('click', () => loadPageContent('allposts'));
+    document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
+    document.querySelector('#user').addEventListener('click', () => loadPageContent('user'));
     // By default, load the inbox
-    load_pagecontent('allposts');
+    loadPageContent('allposts');
 });
 
-function load_pagecontent(page){
+function loadPageContent(page){
     
     if (page === "allposts"){
         //get cookie
@@ -17,6 +17,8 @@ function load_pagecontent(page){
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "block"
         document.querySelector('[name="content"]').value = ''
+        
+        //create post 
         document.querySelector('#newpost-form').onsubmit = function(){
             content = document.querySelector('[name="content"]').value
             const headers = new Headers();
@@ -28,13 +30,26 @@ function load_pagecontent(page){
                   content: content,
               })
             }).then(response => response.json()).then(result => {
-                load_pagecontent('allposts');
-                console.log(result.message);
+                loadPageContent('allposts');
+                console.log(result);
             });
-            
             return false  
-          }
-    }
+        }
+        //clear posts
+        const allPostsDiv = document.querySelector("#allposts-div")
+        allPostsDiv.innerHTML = ""
+        //Grab posts
+        fetch(`/allposts`).then(response => response.json()).then(posts => {
+            posts.forEach(post => {
+                    let postDiv = createHtmlforPost(post)
+                    allPostsDiv.append(postDiv)
+                });
+            });
+        
+        }
+
+
+
     if (page === "following"){
         document.querySelector('#user-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "none"
@@ -50,7 +65,22 @@ function load_pagecontent(page){
     }
 }
 
-//send posr
+
+//create html for each post 
+function createHtmlforPost(post){
+    const postText = `${post.owner__username} post: ${post.content}`
+    postDiv = document.createElement('div')
+    
+    postDiv.innerHTML = postText
+    return postDiv
+
+}
+
+
+
+
+
+
 
 
 //get cookie

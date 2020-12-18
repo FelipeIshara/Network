@@ -8,7 +8,7 @@ class User(AbstractUser):
 class Post(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     content = models.TextField(blank=False)
-    date = models.DateField().auto_now_add
+    date = models.DateField(auto_now_add=True)
     likes = models.PositiveIntegerField(default=0, blank=False)
 
     def __str__(self):

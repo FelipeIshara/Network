@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from .forms import CreatePostForm
+from django.core.serializers import serialize
 
 from .models import User, Post
 import json
@@ -77,3 +78,9 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def all_posts(request):
+    posts = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+    return JsonResponse(posts, safe=False)
+    

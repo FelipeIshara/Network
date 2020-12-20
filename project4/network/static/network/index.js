@@ -3,17 +3,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Use buttons to toggle between views
     document.querySelector('#allposts').addEventListener('click', () => loadPageContent('allposts'));
     document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
-    document.querySelector('#user').addEventListener('click', () => loadPageContent('user'));
-    // By default, load the inbox
+    let profileBtn = document.querySelector('#user')
+    const username = profileBtn.innerHTML 
+    profileBtn.addEventListener('click', () => loadPageContent('user-profile', username));
+    // By default, load the allposts page
     loadPageContent('allposts');
 });
 
+/* to acess profile pages, this function has to be called with
+user-profile as an argument and the username as second argument*/
 function loadPageContent(page, ownerUsername=null){
     
     if (page === "allposts"){
         //get cookie
         const csrftoken = getCookie('csrftoken');
-        document.querySelector('#user-page').style.display = "none"
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "block"
@@ -22,16 +25,18 @@ function loadPageContent(page, ownerUsername=null){
         //clear form to post
         document.querySelector('[name="content"]').value = ''
         //prepare form to post 
-        console.log(csrftoken)
         document.querySelector('#newpost-form').onsubmit = () => sendPost(csrftoken)
         
-        //clear posts
+        //clear all posts
         const allPostsDiv = document.querySelector("#allposts-div")
         allPostsDiv.innerHTML = ""
+        
         //Grab posts
-        fetch(`/allposts`).then(response => response.json()).then(posts => {
+        fetch(`getposts`).then(response => response.json()).then(posts => {
             posts.forEach(post => {
+                    //create html for each post
                     let postDiv = createHtmlforPost(post)
+                    //add the created div to allPostDiv(page)
                     allPostsDiv.append(postDiv)
                 });
             });
@@ -41,25 +46,43 @@ function loadPageContent(page, ownerUsername=null){
 
 
     if (page === "following"){
-        document.querySelector('#user-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#following-page').style.display = "block"
     }
-    if (page === "user"){
-        document.querySelector('#allposts-page').style.display = "none"
-        document.querySelector('#following-page').style.display = "none"
-        document.querySelector('#profile-page').style.display = "none"
-        document.querySelector('#user-page').style.display = "block"
-    }
     if (page === "user-profile"){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#following-page').style.display = "none"
-        document.querySelector('#user-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "block"
-        fetch(`/profile/${ownerUsername}`).then(response => response.json()).then(posts => {
-            document.querySelector('#profileTitle').innerHTML = ownerUsername
-        })
+        fetch(`/profile/${ownerUsername}`).then(response => response.json()).then(profile => {
+            console.log(profile)
+            document.querySelector('#profileTitle').innerHTML = `${ownerUsername} - Profile`
+            document.querySelector('#profile-followers').innerHTML = `Followers: ${profile.followers}`
+            document.querySelector('#profile-following').innerHTML = `Following: ${profile.following}`
+            profilePostsDiv = document.querySelector('#profile-posts')
+            //clear all posts
+            
+            profilePostsDiv.innerHTML = ""
+            
+            //Grab profile posts
+            fetch(`/getposts/${ownerUsername}`).then(response => response.json()).then(posts => {
+                posts.forEach(post => {
+                        //create html for each post
+                        let postDiv = createHtmlforPost(post)
+                        //add the created div to allPostDiv(page)
+                        profilePostsDiv.append(postDiv)
+                    }
+                )
+            });
+        });
+            
+            
+            
+
+        //Display the number of followers the user has, 
+        //the number of people that the user follows.
+
+
     }
     
 }
@@ -67,7 +90,6 @@ function loadPageContent(page, ownerUsername=null){
 
 //create html for each post 
 function createHtmlforPost(post){
-    const postText = `${post.owner__username} posted: ${post.content} on ${post.date} and has ${post.likes} likes`
     //div for post
     postDiv = document.createElement('div')
 
@@ -102,7 +124,6 @@ function createHtmlforPost(post){
 
 //set up post form
 function sendPost(csrftoken){
-        console.log(csrftoken)
         content = document.querySelector('[name="content"]').value
         const headers = new Headers();
         headers.append('X-CSRFToken', csrftoken)

@@ -90,10 +90,24 @@ def register(request):
         return render(request, "network/register.html")
 
 
-def all_posts(request):
-    posts = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-    return JsonResponse(posts, safe=False)
+def get_posts(request, profile=None):
+    print(profile)
+    if profile: 
+        posts = list(Post.objects.filter(owner__username=profile).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        return JsonResponse(posts, safe=False)
+    #IF NOT PROFILE RETURN ALL POSTS
+    else: 
+        posts = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        return JsonResponse(posts, safe=False)
+
+
 
 def profileData(request, username):
-    print("opa")
-    return JsonResponse({"message": username})
+    #querying user
+    user = User.objects.get(username=username)
+    # query following = list(user.following.all().values())
+    # query followers = list(user.followers.all().values())
+    followers = user.followers.all().count()
+    following = user.following.all().count()
+    print(followers)
+    return JsonResponse({"followers": followers, "following": following})

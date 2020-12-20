@@ -3,7 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+   followers = models.ManyToManyField('self', blank=True, null=True, related_name="following", symmetrical=False)
+   
 
 class Post(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")

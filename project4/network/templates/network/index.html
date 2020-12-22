@@ -21,6 +21,7 @@
     </div>
     <div id="profile-page">
         <h3 id="profileTitle"></h3>
+        <button id="follow-btn"></button>
         <div id="profile-followers"></div>
         <div id="profile-following"></div>
         <div id="profile-posts"></div>
@@ -28,5 +29,6 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'network/index.js' %}"></script>
+<script id="hello-data" type="application/json">{"username": "{{request.user}}"}</script>
+<script src="{% static 'network/index.js' %}"></script>
 {% endblock %}

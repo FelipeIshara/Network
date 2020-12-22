@@ -1,3 +1,7 @@
+// get the logged user
+let loggedUser = JSON.parse(document.getElementById('hello-data').textContent);
+console.log(loggedUser)
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // Use buttons to toggle between views
@@ -5,14 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
     let profileBtn = document.querySelector('#user')
     const username = profileBtn.innerHTML 
-    profileBtn.addEventListener('click', () => loadPageContent('user-profile', username));
+    profileBtn.addEventListener('click', () => loadPageContent('user-profile', loggedUser.username));
     // By default, load the allposts page
     loadPageContent('allposts');
 });
 
 /* to acess profile pages, this function has to be called with
 user-profile as an argument and the username as second argument*/
-function loadPageContent(page, ownerUsername=null){
+function loadPageContent(page, profileUsername=null){
     
     if (page === "allposts"){
         //get cookie
@@ -42,9 +46,6 @@ function loadPageContent(page, ownerUsername=null){
             });
         
         }
-
-
-
     if (page === "following"){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
@@ -54,9 +55,27 @@ function loadPageContent(page, ownerUsername=null){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "block"
-        fetch(`/profile/${ownerUsername}`).then(response => response.json()).then(profile => {
+        fetch(`/profile/${profileUsername}`).then(response => response.json()).then(profile => {
             console.log(profile)
-            document.querySelector('#profileTitle').innerHTML = `${ownerUsername} - Profile`
+            document.querySelector('#profileTitle').innerHTML = `${profileUsername} - Profile`
+            //Follow and Unfollow btn event
+            const followBtn = document.querySelector('#follow-btn')
+            if (loggedUser.username === profileUsername){
+                followBtn.style.display = "none";
+            }else{
+                followBtn.style.display = "block";
+                //check if logged user follow the profile
+                if (!profile.isFollowing){
+                    followBtn.innerHTML = "Follow"
+                } else {
+                    followBtn.innerHTML = "Unfollow"
+                }
+                
+            }
+            
+            //Follow and Unfollow btn event
+            //Display the number of followers the user has, 
+            //the number of people that the user follows.
             document.querySelector('#profile-followers').innerHTML = `Followers: ${profile.followers}`
             document.querySelector('#profile-following').innerHTML = `Following: ${profile.following}`
             profilePostsDiv = document.querySelector('#profile-posts')
@@ -65,7 +84,7 @@ function loadPageContent(page, ownerUsername=null){
             profilePostsDiv.innerHTML = ""
             
             //Grab profile posts
-            fetch(`/getposts/${ownerUsername}`).then(response => response.json()).then(posts => {
+            fetch(`/getposts/${profileUsername}`).then(response => response.json()).then(posts => {
                 posts.forEach(post => {
                         //create html for each post
                         let postDiv = createHtmlforPost(post)
@@ -76,17 +95,9 @@ function loadPageContent(page, ownerUsername=null){
             });
         });
             
-            
-            
-
-        //Display the number of followers the user has, 
-        //the number of people that the user follows.
-
-
     }
     
 }
-
 
 //create html for each post 
 function createHtmlforPost(post){
@@ -120,8 +131,6 @@ function createHtmlforPost(post){
 
 }
 
-
-
 //set up post form
 function sendPost(csrftoken){
         content = document.querySelector('[name="content"]').value
@@ -140,9 +149,6 @@ function sendPost(csrftoken){
         return false  
     
 }
-
-
-
 
 //get cookie
 function getCookie(name) {

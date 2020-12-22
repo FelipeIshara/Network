@@ -13,8 +13,6 @@ import json
 
 
 def index(request):
-    
-    print(request.user)
     if request.user.is_authenticated:
         create_form = CreatePostForm()
         return render(request, "network/index.html", {
@@ -91,7 +89,6 @@ def register(request):
 
 
 def get_posts(request, profile=None):
-    print(profile)
     if profile: 
         posts = list(Post.objects.filter(owner__username=profile).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
         return JsonResponse(posts, safe=False)
@@ -104,10 +101,18 @@ def get_posts(request, profile=None):
 
 def profileData(request, username):
     #querying user
-    user = User.objects.get(username=username)
-    # query following = list(user.following.all().values())
-    # query followers = list(user.followers.all().values())
-    followers = user.followers.all().count()
-    following = user.following.all().count()
-    print(followers)
-    return JsonResponse({"followers": followers, "following": following})
+    profile = User.objects.get(username=username)
+    # query following = list(profile.following.all().values())
+    # query followers = list(profile.followers.all().values())
+    followers = profile.followers.all().count()
+    following = profile.following.all().count()
+    #check if request.user follow the profile
+     
+    userIsFollowingTheProfile = profile.followers.filter(username=request.user).first()
+    if userIsFollowingTheProfile:
+        isFollowing = True
+    else:
+        isFollowing = False
+        
+        
+    return JsonResponse({"followers": followers, "following": following, "isFollowing": isFollowing})

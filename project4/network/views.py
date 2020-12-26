@@ -88,9 +88,20 @@ def register(request):
         return render(request, "network/register.html")
 
 
-def get_posts(request, profile=None):
-    if profile: 
-        posts = list(Post.objects.filter(owner__username=profile).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+def get_posts(request, pagetype=None, username=None):
+    if pagetype == "following":
+        #grab user 
+        user = User.objects.get(username=request.user)
+        print(user)
+        #grab following user
+        followersquery = list(user.followers.all().values('username'))
+        q = Post.objects.all()
+        followers = [follower['username'] for follower in followersquery]
+        print(followers)
+        posts = list(Post.objects.filter(owner__username__in=followers).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        return JsonResponse(posts, safe=False)
+    elif pagetype == "profile":
+        posts = list(Post.objects.filter(owner__username=username).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
         return JsonResponse(posts, safe=False)
     #IF NOT PROFILE RETURN ALL POSTS
     else: 
@@ -113,6 +124,21 @@ def profileData(request, username):
         isFollowing = True
     else:
         isFollowing = False
-        
-        
+            
     return JsonResponse({"followers": followers, "following": following, "isFollowing": isFollowing})
+
+
+def follow(request, username):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    user = User.objects.get(username=username)
+    
+    userAlreadyfollowed = user.followers.filter(username=request.user).first()
+    if userAlreadyfollowed:
+        message = f"Unfollowing {username}"
+        #unfollow
+        user.followers.remove(request.user)
+    else:
+        message = f"Following {username}"
+        user.followers.add(request.user)
+    return JsonResponse({"message": message}, status=201)

@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#allposts').addEventListener('click', () => loadPageContent('allposts'));
     document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
     let profileBtn = document.querySelector('#user')
-    const username = profileBtn.innerHTML 
     profileBtn.addEventListener('click', () => loadPageContent('user-profile', loggedUser.username));
     // By default, load the allposts page
     loadPageContent('allposts');
@@ -50,6 +49,18 @@ function loadPageContent(page, profileUsername=null){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#following-page').style.display = "block"
+        const followingPostsDiv = document.querySelector("#following-posts-div")
+        //clear all posts
+        followingPostsDiv.innerHTML = ""
+        fetch(`/getposts/following`).then(response => response.json()).then(posts => {
+            posts.forEach(post => {
+                   //create html for each post
+                   let postDiv = createHtmlforPost(post)
+                   //add the created div to allPostDiv(page)
+                   followingPostsDiv.append(postDiv)
+                }
+            );
+        }) 
     }
     if (page === "user-profile"){
         document.querySelector('#allposts-page').style.display = "none"
@@ -70,6 +81,9 @@ function loadPageContent(page, profileUsername=null){
                 } else {
                     followBtn.innerHTML = "Unfollow"
                 }
+                 //get cookie
+                 const csrftoken = getCookie('csrftoken');
+                 document.querySelector('#follow-btn').onclick = () => follow(csrftoken, profileUsername)
                 
             }
             
@@ -80,11 +94,9 @@ function loadPageContent(page, profileUsername=null){
             document.querySelector('#profile-following').innerHTML = `Following: ${profile.following}`
             profilePostsDiv = document.querySelector('#profile-posts')
             //clear all posts
-            
             profilePostsDiv.innerHTML = ""
-            
             //Grab profile posts
-            fetch(`/getposts/${profileUsername}`).then(response => response.json()).then(posts => {
+            fetch(`/getposts/profile/${profileUsername}`).then(response => response.json()).then(posts => {
                 posts.forEach(post => {
                         //create html for each post
                         let postDiv = createHtmlforPost(post)
@@ -149,6 +161,21 @@ function sendPost(csrftoken){
         return false  
     
 }
+function follow(csrftoken, username){
+    //fetch(`/follow/${profileUsername}`).then(response => response.json()).then(profile => {})
+    const headers = new Headers();
+    headers.append('X-CSRFToken', csrftoken)
+    fetch(`/follow/${username}`, {
+        headers: headers,  
+        method: 'POST'
+    }).then(response => response.json()).then(result => {
+        loadPageContent('user-profile', username);
+        console.log(result.message);
+    });
+}
+
+
+
 
 //get cookie
 function getCookie(name) {

@@ -131,9 +131,14 @@ function createHtmlforPost(post){
     const contentDiv = document.createElement('div')
     contentDiv.innerHTML = post.content
     const dateDiv = document.createElement('div')
-    dateDiv.innerHTML = post.date
+    
+    let newDateTime = post.date.split('T')
+    dateparcial = newDateTime[0].split('-')
+    timeparcial = newDateTime[1].split('.')[0].split(':')
+
+    dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]}/${dateparcial[2]} - ${timeparcial[0]}:${timeparcial[1]}`
     const likesDiv = document.createElement('div')
-    likesDiv.innerHTML = post.likes
+    likesDiv.innerHTML = `Likes -> ${post.likes}`
 
     postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv)
     

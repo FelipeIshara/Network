@@ -6,6 +6,7 @@ from django.urls import reverse
 from .forms import CreatePostForm
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .models import User, Post
 import json
@@ -88,25 +89,31 @@ def register(request):
         return render(request, "network/register.html")
 
 
-def get_posts(request, pagetype=None, username=None):
+def get_posts(request, pagetype=None, username=None, page=1):
     if pagetype == "following":
         #grab user 
         user = User.objects.get(username=request.user)
         print(user)
         #grab following user
-        followersquery = list(user.followers.all().values('username'))
+        followingquery = list(user.following.all().values('username'))
         q = Post.objects.all()
-        followers = [follower['username'] for follower in followersquery]
-        print(followers)
-        posts = list(Post.objects.filter(owner__username__in=followers).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        return JsonResponse(posts, safe=False)
+        following = [follower['username'] for follower in followingquery]
+        print(following)
+        postsList = list(Post.objects.filter(owner__username__in=following).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        page = posts.page(page)
+        return JsonResponse(page.object_list, safe=False)
     elif pagetype == "profile":
-        posts = list(Post.objects.filter(owner__username=username).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        return JsonResponse(posts, safe=False)
+        postsList = list(Post.objects.filter(owner__username=username).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        posts = Paginator(postsList, 10)
+        page = posts.page(page)
+        return JsonResponse(page.object_list, safe=False)
     #IF NOT PROFILE RETURN ALL POSTS
     else: 
-        posts = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        return JsonResponse(posts, safe=False)
+        postsList = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        posts = Paginator(postsList, 10)
+        page = posts.page(page)
+        print(page)
+        return JsonResponse(page.object_list, safe=False)
 
 
 

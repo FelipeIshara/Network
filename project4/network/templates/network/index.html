@@ -7,8 +7,8 @@
         {% if user.is_authenticated %}
         <div class="createpost-div">
             <form id="newpost-form">
-            
-            {{ createform }}
+            <label for="content">Post:</label>
+            <textarea name="content" id="post-content" cols="30" rows="10"></textarea>
             <input class="create-btn-form btn btn-primary" type="submit" value="Submit">            
             </form>
         </div>

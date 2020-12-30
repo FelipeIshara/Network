@@ -3,7 +3,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from .forms import CreatePostForm
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -15,10 +14,7 @@ import json
 
 def index(request):
     if request.user.is_authenticated:
-        create_form = CreatePostForm()
-        return render(request, "network/index.html", {
-            "createform": create_form
-        })
+        return render(request, "network/index.html")
     else:
         return HttpResponseRedirect(reverse("login"))
 
@@ -36,6 +32,13 @@ def new_post(request):
     print(f"create post for {owner}")
     return JsonResponse({"message": f"{owner} post: {content}"}, status=201)
 
+def update_post(request, postid):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    data = json.loads(request.body)
+    content = data.get("content")
+    post = Post.objects.filter(pk=postid).update(content=content)
+    return JsonResponse({"message": f"{request.user} updated post content to: {content}"}, status=201)
 
 def login_view(request):
     if request.method == "POST":
@@ -92,7 +95,12 @@ def register(request):
 
 def get_posts(request, pagetype, pagenumber, profileusername = None):
     if pagetype == "all":
-        postsQuery = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        postsQuery = list(Post.objects.order_by("-date"))
+        formatedPosts = formate_posts(postsQuery, request.user)
+        
+            
+            
+
     if pagetype == "following":
         #grab following Users
         user = User.objects.get(username=request.user)
@@ -101,7 +109,9 @@ def get_posts(request, pagetype, pagenumber, profileusername = None):
         postsQuery = list(Post.objects.filter(owner__username__in=followingUsersList).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes')) 
     if pagetype == "profile":
         postsQuery = list(Post.objects.filter(owner__username=profileusername).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-    posts = Paginator(postsQuery, 10)
+    
+    
+    posts = Paginator(formatedPosts, 10)
     if pagenumber not in posts.page_range:
         print(f'page: {page} not valid !!!!')
         return JsonResponse({'message': "No content for this page"})
@@ -147,3 +157,43 @@ def follow(request, username):
         message = f"Following {username}"
         user.followers.add(request.user)
     return JsonResponse({"message": message}, status=201)
+
+
+def like_post(request, postid):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    post = Post.objects.get(pk=postid)
+    print(post.id)
+
+    userAlreadyLiked = post.likes.filter(username=request.user).first()
+    if userAlreadyLiked:
+        message = f'UnLiking Post'
+        post.likes.remove(request.user)
+    else:
+        message = f'Liking Post'
+        post.likes.add(request.user)
+    return JsonResponse({"message": message}, status=201)
+ 
+
+
+def formate_posts(postsQuery, user):
+    listOfPosts = []
+    for post in postsQuery:
+        userAlreadyLike = ""
+        likes = post.likes.all()
+        if user in list(likes):
+            userAlreadyLike = True
+        else:
+            userAlreadyLike = False
+        ownerusername = post.owner.username
+        formatedPost = {
+            'owner': post.owner.username,
+            'id': post.id,
+            'content': post.content,
+            'date': post.date,
+            'likes': likes.count(),
+            'userAlreadyLike': userAlreadyLike
+        }
+        listOfPosts.append(formatedPost)
+    return listOfPosts
+    

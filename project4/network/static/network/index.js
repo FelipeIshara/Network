@@ -70,19 +70,7 @@ function loadPageContent(page, profileUsername=null){
              //generate page 1 by defalt
             let pageNumber = 1
             grabPageOfPosts(page, pageNumber, profileUsername)
-            /*//clear all posts
-            profilePostsDiv = document.querySelector('#profile-posts')
-            profilePostsDiv.innerHTML = ""
-            //Grab profile posts
-            fetch(`/getposts/profile/${profileUsername}`).then(response => response.json()).then(posts => {
-                posts.forEach(post => {
-                        //create html for each post
-                        let postDiv = createHtmlforPost(post)
-                        //add the created div to allPostDiv(page)
-                        profilePostsDiv.append(postDiv)
-                    }
-                )
-            });*/
+
         });
             
     }
@@ -99,8 +87,8 @@ function createHtmlforPost(post){
     const profileLink = document.createElement('button')
     
     profileLink.setAttribute("class", "unstyle-btn profilelink")
-    profileLink.innerHTML = post.owner__username
-    profileLink.addEventListener("click", () => loadPageContent("profile", post.owner__username))
+    profileLink.innerHTML = post.owner
+    profileLink.addEventListener("click", () => loadPageContent("profile", post.owner))
     usernameDiv.append(profileLink)
     
 
@@ -116,15 +104,75 @@ function createHtmlforPost(post){
 
     dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]}/${dateparcial[2]} - ${timeparcial[0]}:${timeparcial[1]}`
     const likesDiv = document.createElement('div')
-    likesDiv.innerHTML = `Likes -> ${post.likes}`
-
-    postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv)
+    if (post.likes){
+        likesDiv.innerHTML = `Likes: ${post.likes}`
+    }
     
+    // Edit Btn
+    if (post.owner__username === loggedUser.username){
+        const editBtn = document.createElement('button')
+        editBtn.innerHTML = "Edit"
+        editBtn.onclick = () => {
+            contentDiv.innerHTML = ""
+            textAreaForPost = document.createElement('textarea')
+            textAreaForPost.innerHTML = post.content
+            contentDiv.append(textAreaForPost)
+            editBtn.innerHTML = "Update"
+            textAreaForPost.setAttribute('name', 'updatecontent')
+            editBtn.onclick = () => updatePost(post.id)
+        }
+        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, editBtn)
+    } else {
+        const likeBtn = document.createElement('button')
+        if (post.userAlreadyLike){
+            likeBtn.innerHTML = "UnLike"
+        } else {
+            likeBtn.innerHTML = "Like"
+        }
+        
+        
+        likeBtn.onclick = () => likePost(post.id)
+        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
+    }
+
     postDiv.style.display = "flex"
     
     return postDiv
 
 }
+
+function likePost(postId){
+    const csrftoken = getCookie('csrftoken');
+    const headers = new Headers();
+    headers.append('X-CSRFToken', csrftoken)
+    fetch(`/likepost/${postId}`, {
+        headers: headers,  
+        method: 'POST'
+    }).then(response => response.json()).then(result => {
+        loadPageContent('all');
+        console.log(result);
+    });
+}
+
+
+function updatePost(postId){
+    const csrftoken = getCookie('csrftoken');
+    content = document.querySelector('[name="updatecontent"]').value
+    console.log(content)
+    const headers = new Headers();
+    headers.append('X-CSRFToken', csrftoken)
+    fetch(`/updatepost/${postId}`, {
+        headers: headers,  
+        method: 'POST',
+        body: JSON.stringify({
+            content: content,
+        })
+    }).then(response => response.json()).then(result => {
+        loadPageContent('all');
+        console.log(result);
+    });
+}
+
 
 //set up post form
 function sendPost(csrftoken){
@@ -138,7 +186,7 @@ function sendPost(csrftoken){
               content: content,
           })
         }).then(response => response.json()).then(result => {
-            loadPageContent('allposts');
+            loadPageContent('all');
             console.log(result);
         });
         return false  
@@ -152,7 +200,7 @@ function follow(csrftoken, username){
         headers: headers,  
         method: 'POST'
     }).then(response => response.json()).then(result => {
-        loadPageContent('user-profile', username);
+        loadPageContent('profile', username);
         console.log(result.message);
     });
 }

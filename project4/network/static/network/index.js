@@ -3,32 +3,44 @@ let loggedUser = JSON.parse(document.getElementById('hello-data').textContent);
 console.log(loggedUser)
 
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Use buttons to toggle between views
-    document.querySelector('#allposts').addEventListener('click', () => loadPageContent('all'));
-    document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
-    let profileBtn = document.querySelector('#user')
-    profileBtn.addEventListener('click', () => loadPageContent('profile', loggedUser.username));
-    // By default, load the allposts page
-    loadPageContent('all');
+    if (loggedUser.username === "AnonymousUser"){
+        
+        loadPageContent('all');
+    } else {
+        // Use buttons to toggle between views
+        document.querySelector('#allposts').addEventListener('click', () => loadPageContent('all'));
+        document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
+        let profileBtn = document.querySelector('#user')
+        profileBtn.addEventListener('click', () => loadPageContent('profile', loggedUser.username));
+        // By default, load the allposts page
+        loadPageContent('all');
+    }
 });
 
 /* to acess profile pages, this function has to be called with
 user-profile as an argument and the username as second argument*/
 function loadPageContent(page, profileUsername=null){
     
+
     if (page === "all"){
-        //get cookie
-        const csrftoken = getCookie('csrftoken');
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "block"
-        //clear form and prepare form to post 
-        document.querySelector('[name="content"]').value = ''
-        document.querySelector('#newpost-form').onsubmit = () => sendPost(csrftoken)
-        //generate page 1 by defalt
-        let pageNumber = 1
-        grabPageOfPosts(page, pageNumber)    
+        if (loggedUser.username == "AnonymousUser"){
+            console.log("pinto")
+            let pageNumber = 1
+            grabPageOfPosts(page, pageNumber) 
+        } else {
+            //get cookie
+            const csrftoken = getCookie('csrftoken');
+            
+            //clear form and prepare form to post 
+            document.querySelector('[name="content"]').value = ''
+            document.querySelector('#newpost-form').onsubmit = () => sendPost(csrftoken)
+            //generate page 1 by defalt
+            let pageNumber = 1
+            grabPageOfPosts(page, pageNumber)
+        }    
     }
     if (page === "following"){
         document.querySelector('#allposts-page').style.display = "none"
@@ -42,11 +54,12 @@ function loadPageContent(page, profileUsername=null){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "block"
+        
         fetch(`/profile/${profileUsername}`).then(response => response.json()).then(profile => {
             document.querySelector('#profileTitle').innerHTML = `${profileUsername} - Profile`
             //Follow and Unfollow btn event
             const followBtn = document.querySelector('#follow-btn')
-            if (loggedUser.username === profileUsername){
+            if (loggedUser.username === profileUsername || loggedUser.username === "AnonymousUser"){
                 followBtn.style.display = "none";
             }else{
                 followBtn.style.display = "block";
@@ -59,7 +72,7 @@ function loadPageContent(page, profileUsername=null){
                  //get cookie
                  const csrftoken = getCookie('csrftoken');
                  document.querySelector('#follow-btn').onclick = () => follow(csrftoken, profileUsername)
-                
+            
             }
             
             //Follow and Unfollow btn event
@@ -104,36 +117,41 @@ function createHtmlforPost(post){
 
     dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]}/${dateparcial[2]} - ${timeparcial[0]}:${timeparcial[1]}`
     const likesDiv = document.createElement('div')
-    if (post.likes){
-        likesDiv.innerHTML = `Likes: ${post.likes}`
-    }
     
-    // Edit Btn
-    if (post.owner__username === loggedUser.username){
-        const editBtn = document.createElement('button')
-        editBtn.innerHTML = "Edit"
-        editBtn.onclick = () => {
-            contentDiv.innerHTML = ""
-            textAreaForPost = document.createElement('textarea')
-            textAreaForPost.innerHTML = post.content
-            contentDiv.append(textAreaForPost)
-            editBtn.innerHTML = "Update"
-            textAreaForPost.setAttribute('name', 'updatecontent')
-            editBtn.onclick = () => updatePost(post.id)
-        }
-        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, editBtn)
-    } else {
-        const likeBtn = document.createElement('button')
-        if (post.userAlreadyLike){
-            likeBtn.innerHTML = "UnLike"
+    likesDiv.innerHTML = `Likes: ${post.likes}`
+    
+    if(!loggedUser.username === "AnonymousUser"){
+        if (post.owner === loggedUser.username){
+            const editBtn = document.createElement('button')
+            editBtn.innerHTML = "Edit"
+            editBtn.onclick = () => {
+                contentDiv.innerHTML = ""
+                textAreaForPost = document.createElement('textarea')
+                textAreaForPost.innerHTML = post.content
+                contentDiv.append(textAreaForPost)
+                editBtn.innerHTML = "Update"
+                textAreaForPost.setAttribute('name', 'updatecontent')
+                editBtn.onclick = () => updatePost(post.id)
+            }
+            postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, editBtn)
         } else {
-            likeBtn.innerHTML = "Like"
+            
+            const likeBtn = document.createElement('button')
+            if (post.userAlreadyLike){
+                likeBtn.innerHTML = "UnLike"
+            } else {
+                likeBtn.innerHTML = "Like"
+            }
+            
+            
+            likeBtn.onclick = () => likePost(post.id)
+            postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
         }
-        
-        
-        likeBtn.onclick = () => likePost(post.id)
-        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
+    } else {
+        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv)
     }
+    // Edit Btn
+    
 
     postDiv.style.display = "flex"
     

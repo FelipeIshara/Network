@@ -13,10 +13,10 @@ import json
 
 
 def index(request):
-    if request.user.is_authenticated:
-        return render(request, "network/index.html")
-    else:
-        return HttpResponseRedirect(reverse("login"))
+    #if request.user.is_authenticated:
+    return render(request, "network/index.html")
+    #else:
+        #return HttpResponseRedirect(reverse("login"))
 
 @login_required
 def new_post(request):
@@ -103,13 +103,14 @@ def get_posts(request, pagetype, pagenumber, profileusername = None):
 
     if pagetype == "following":
         #grab following Users
-        user = User.objects.get(username=request.user)
-        followingUsersQuery = list(user.following.all().values('username'))
+        user = User.objects.get(pk=request.user.id)
+        followingUsersQuery = user.following.all().values('username')
         followingUsersList = [user['username'] for user in followingUsersQuery]
-        postsQuery = list(Post.objects.filter(owner__username__in=followingUsersList).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes')) 
+        postsQuery = list(Post.objects.filter(owner__username__in=followingUsersList).order_by("-date"))
+        formatedPosts = formate_posts(postsQuery, request.user) 
     if pagetype == "profile":
-        postsQuery = list(Post.objects.filter(owner__username=profileusername).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-    
+        postsQuery = list(Post.objects.filter(owner__username=profileusername).order_by("-date"))
+        formatedPosts = formate_posts(postsQuery, request.user)
     
     posts = Paginator(formatedPosts, 10)
     if pagenumber not in posts.page_range:

@@ -23,11 +23,9 @@
                 <li class="nav-item">
                     <button id="user" class="unstyle-btn nav-link">{{ user.username }}</button>
                 </li>
-                
                 <li class="nav-item">
                     <button id="allposts" class=" unstyle-btn nav-link" >All Posts</button>
                 </li>
-               
                 <li class="nav-item">
                     <button id="following" class="unstyle-btn nav-link" >Following</button>
                 </li>
@@ -35,6 +33,9 @@
                     <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                 </li>
                 {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">All Posts</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Log In</a>
                     </li>

@@ -89,42 +89,28 @@ def register(request):
         return render(request, "network/register.html")
 
 
-def get_posts(request, pagetype=None, username=None, page=1):
-    if pagetype == "following":
-        #grab user 
-        user = User.objects.get(username=request.user)
-        print(user)
-        #grab following user
-        followingquery = list(user.following.all().values('username'))
-        q = Post.objects.all()
-        following = [follower['username'] for follower in followingquery]
-        print(following)
-        postsList = list(Post.objects.filter(owner__username__in=following).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        page = posts.page(page)
-        return JsonResponse(page.object_list, safe=False)
-    elif pagetype == "profile":
-        postsList = list(Post.objects.filter(owner__username=username).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        posts = Paginator(postsList, 10)
-        postPage = posts.page(page)
-        return JsonResponse(postPage.object_list, safe=False)
-    #IF NOT PROFILE RETURN ALL POSTS
-    else: 
+
+def get_posts(request, pagetype, pagenumber, profileusername = None):
+    if pagetype == "all":
         postsQuery = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        posts = Paginator(postsQuery, 10)
-        if page not in posts.page_range:
-            print(f'page: {page} not valid !!!!')
-        else:
-            postsPage = posts.page(page)
-            postsList = postsPage.object_list
-            hasNext = postsPage.has_next()
-            hasPrevious = postsPage.has_previous() 
-            
-            print(f'{hasNext} and {hasPrevious}')
-            
-            return JsonResponse({'postsList': postsList, 'hasNext': hasNext, 'hasPrevious': hasPrevious})
-        
-        
-        
+    if pagetype == "following":
+        #grab following Users
+        user = User.objects.get(username=request.user)
+        followingUsersQuery = list(user.following.all().values('username'))
+        followingUsersList = [user['username'] for user in followingUsersQuery]
+        postsQuery = list(Post.objects.filter(owner__username__in=followingUsersList).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes')) 
+    if pagetype == "profile":
+        postsQuery = list(Post.objects.filter(owner__username=profileusername).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+    posts = Paginator(postsQuery, 10)
+    if pagenumber not in posts.page_range:
+        print(f'page: {page} not valid !!!!')
+        return JsonResponse({'message': "No content for this page"})
+    postsPage = posts.page(pagenumber)
+    postsList = postsPage.object_list
+    hasNext = postsPage.has_next()
+    hasPrevious = postsPage.has_previous()
+    return JsonResponse({'postsList': postsList, 'hasNext': hasNext, 'hasPrevious': hasPrevious}) 
+
         
 
 

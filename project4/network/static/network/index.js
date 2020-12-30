@@ -5,63 +5,44 @@ console.log(loggedUser)
 document.addEventListener('DOMContentLoaded', function() {
     
     // Use buttons to toggle between views
-    document.querySelector('#allposts').addEventListener('click', () => loadPageContent('allposts'));
+    document.querySelector('#allposts').addEventListener('click', () => loadPageContent('all'));
     document.querySelector('#following').addEventListener('click', () => loadPageContent('following'));
     let profileBtn = document.querySelector('#user')
-    profileBtn.addEventListener('click', () => loadPageContent('user-profile', loggedUser.username));
+    profileBtn.addEventListener('click', () => loadPageContent('profile', loggedUser.username));
     // By default, load the allposts page
-    loadPageContent('allposts');
+    loadPageContent('all');
 });
 
 /* to acess profile pages, this function has to be called with
 user-profile as an argument and the username as second argument*/
 function loadPageContent(page, profileUsername=null){
     
-    if (page === "allposts"){
+    if (page === "all"){
         //get cookie
         const csrftoken = getCookie('csrftoken');
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#allposts-page').style.display = "block"
-        
-        
-        //clear form to post
+        //clear form and prepare form to post 
         document.querySelector('[name="content"]').value = ''
-        //prepare form to post 
         document.querySelector('#newpost-form').onsubmit = () => sendPost(csrftoken)
-        
+        //generate page 1 by defalt
         let pageNumber = 1
-        //get posts by page
-        grabPosts(pageNumber)
-        console.log(pageNumber)
-
-
-
-            
+        grabPageOfPosts(page, pageNumber)    
     }
     if (page === "following"){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
         document.querySelector('#following-page').style.display = "block"
-        const followingPostsDiv = document.querySelector("#following-posts-div")
-        //clear all posts
-        followingPostsDiv.innerHTML = ""
-        fetch(`/getposts/following`).then(response => response.json()).then(posts => {
-            posts.forEach(post => {
-                   //create html for each post
-                   let postDiv = createHtmlforPost(post)
-                   //add the created div to allPostDiv(page)
-                   followingPostsDiv.append(postDiv)
-                }
-            );
-        }) 
+        //generate page 1 by defalt
+        let pageNumber = 1
+        grabPageOfPosts(page, pageNumber) 
     }
-    if (page === "user-profile"){
+    if (page === "profile"){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "block"
         fetch(`/profile/${profileUsername}`).then(response => response.json()).then(profile => {
-            console.log(profile)
             document.querySelector('#profileTitle').innerHTML = `${profileUsername} - Profile`
             //Follow and Unfollow btn event
             const followBtn = document.querySelector('#follow-btn')
@@ -86,8 +67,11 @@ function loadPageContent(page, profileUsername=null){
             //the number of people that the user follows.
             document.querySelector('#profile-followers').innerHTML = `Followers: ${profile.followers}`
             document.querySelector('#profile-following').innerHTML = `Following: ${profile.following}`
+             //generate page 1 by defalt
+            let pageNumber = 1
+            grabPageOfPosts(page, pageNumber, profileUsername)
+            /*//clear all posts
             profilePostsDiv = document.querySelector('#profile-posts')
-            //clear all posts
             profilePostsDiv.innerHTML = ""
             //Grab profile posts
             fetch(`/getposts/profile/${profileUsername}`).then(response => response.json()).then(posts => {
@@ -98,7 +82,7 @@ function loadPageContent(page, profileUsername=null){
                         profilePostsDiv.append(postDiv)
                     }
                 )
-            });
+            });*/
         });
             
     }
@@ -116,7 +100,7 @@ function createHtmlforPost(post){
     
     profileLink.setAttribute("class", "unstyle-btn profilelink")
     profileLink.innerHTML = post.owner__username
-    profileLink.addEventListener("click", () => loadPageContent("user-profile", post.owner__username))
+    profileLink.addEventListener("click", () => loadPageContent("profile", post.owner__username))
     usernameDiv.append(profileLink)
     
 
@@ -192,41 +176,57 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-function grabPosts(pageNumber){
-    console.log(`grabbing posts for ${pageNumber}`)
+
+
+function grabPageOfPosts(pageType, pageNumber, profileUsername=null){
+    console.log(`grabbing ${pageType} posts, page:${pageNumber}`)
     //clear all posts
-    const allPostsDiv = document.querySelector("#allposts-div")
-    allPostsDiv.innerHTML = ""
+    const PostsDiv = document.querySelector(`#${pageType}-posts-div`)
+    PostsDiv.innerHTML = ""
     
-    //Grab posts
-    fetch(`getposts/${pageNumber}`).then(response => response.json()).then(result => {
-        console.log(result)
-        result.postsList.forEach(post => {
-                //create html for each post
-                let postDiv = createHtmlforPost(post)
-                //add the created div to allPostDiv(page)
-                allPostsDiv.append(postDiv)
-            }
-        );
-        // set up Pagination
-        if (result.hasPrevious){
-            const previousBtn = document.querySelector("#previousBtn")
-            previousBtn.style.display = "block"
-            previousBtn.onclick = () => grabPosts(pageNumber-1)
-        } else {
-            document.querySelector("#previousBtn").style.display = "none"
-        }
-
-        if (result.hasNext){
-            const nextBtn = document.querySelector("#nextBtn")
-            nextBtn.style.display = "block"
-            nextBtn.onclick = () => grabPosts(pageNumber+1)
-
-        } else {
-            document.querySelector("#nextBtn").style.display = "none"
-        }
     
-
-    });
+    if (profileUsername){
+        fetch(`getposts/${pageType}/${pageNumber}/${profileUsername}`).then(response => response.json()).then(page => {
+            page.postsList.forEach(post => {
+                    //create html for each post
+                    let postDiv = createHtmlforPost(post)
+                    //add the created div to allPostDiv(page)
+                    PostsDiv.append(postDiv)
+                }
+            );
+            // set up Pagination
+            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber, profileUsername)
+        });
+    } else {
+        fetch(`getposts/${pageType}/${pageNumber}`).then(response => response.json()).then(page => {
+            page.postsList.forEach(post => {
+                    //create html for each post
+                    let postDiv = createHtmlforPost(post)
+                    //add the created div to allPostDiv(page)
+                    PostsDiv.append(postDiv)
+                }
+            );
+            // set up Pagination
+            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber)
+        });
+    }
 }
-        
+
+function setPagination(pageType, hasNext, hasPrevious, pageNumber, profileUsername=null){
+    if (hasPrevious){
+        const previousBtn = document.querySelector("#previousBtn")
+        previousBtn.style.display = "block"
+        previousBtn.onclick = () => grabPageOfPosts(pageType, pageNumber-1, profileUsername)
+    } else {
+        document.querySelector("#previousBtn").style.display = "none"
+    }
+
+    if (hasNext){
+        const nextBtn = document.querySelector("#nextBtn")
+        nextBtn.style.display = "block"
+        nextBtn.onclick = () => grabPageOfPosts(pageType, pageNumber+1, profileUsername)
+
+    } else {
+        document.querySelector("#nextBtn").style.display = "none"
+    }
+}

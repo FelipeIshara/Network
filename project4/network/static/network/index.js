@@ -30,21 +30,15 @@ function loadPageContent(page, profileUsername=null){
         //prepare form to post 
         document.querySelector('#newpost-form').onsubmit = () => sendPost(csrftoken)
         
-        //clear all posts
-        const allPostsDiv = document.querySelector("#allposts-div")
-        allPostsDiv.innerHTML = ""
-        
-        //Grab posts
-        fetch(`getposts`).then(response => response.json()).then(posts => {
-            posts.forEach(post => {
-                    //create html for each post
-                    let postDiv = createHtmlforPost(post)
-                    //add the created div to allPostDiv(page)
-                    allPostsDiv.append(postDiv)
-                });
-            });
-        
-        }
+        let pageNumber = 1
+        //get posts by page
+        grabPosts(pageNumber)
+        console.log(pageNumber)
+
+
+
+            
+    }
     if (page === "following"){
         document.querySelector('#allposts-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
@@ -198,3 +192,41 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+function grabPosts(pageNumber){
+    console.log(`grabbing posts for ${pageNumber}`)
+    //clear all posts
+    const allPostsDiv = document.querySelector("#allposts-div")
+    allPostsDiv.innerHTML = ""
+    
+    //Grab posts
+    fetch(`getposts/${pageNumber}`).then(response => response.json()).then(result => {
+        console.log(result)
+        result.postsList.forEach(post => {
+                //create html for each post
+                let postDiv = createHtmlforPost(post)
+                //add the created div to allPostDiv(page)
+                allPostsDiv.append(postDiv)
+            }
+        );
+        // set up Pagination
+        if (result.hasPrevious){
+            const previousBtn = document.querySelector("#previousBtn")
+            previousBtn.style.display = "block"
+            previousBtn.onclick = () => grabPosts(pageNumber-1)
+        } else {
+            document.querySelector("#previousBtn").style.display = "none"
+        }
+
+        if (result.hasNext){
+            const nextBtn = document.querySelector("#nextBtn")
+            nextBtn.style.display = "block"
+            nextBtn.onclick = () => grabPosts(pageNumber+1)
+
+        } else {
+            document.querySelector("#nextBtn").style.display = "none"
+        }
+    
+
+    });
+}
+        

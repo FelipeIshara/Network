@@ -105,15 +105,27 @@ def get_posts(request, pagetype=None, username=None, page=1):
     elif pagetype == "profile":
         postsList = list(Post.objects.filter(owner__username=username).order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
         posts = Paginator(postsList, 10)
-        page = posts.page(page)
-        return JsonResponse(page.object_list, safe=False)
+        postPage = posts.page(page)
+        return JsonResponse(postPage.object_list, safe=False)
     #IF NOT PROFILE RETURN ALL POSTS
     else: 
-        postsList = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
-        posts = Paginator(postsList, 10)
-        page = posts.page(page)
-        print(page)
-        return JsonResponse(page.object_list, safe=False)
+        postsQuery = list(Post.objects.order_by("-date").values('id', 'owner__username', 'content', 'date', 'likes'))
+        posts = Paginator(postsQuery, 10)
+        if page not in posts.page_range:
+            print(f'page: {page} not valid !!!!')
+        else:
+            postsPage = posts.page(page)
+            postsList = postsPage.object_list
+            hasNext = postsPage.has_next()
+            hasPrevious = postsPage.has_previous() 
+            
+            print(f'{hasNext} and {hasPrevious}')
+            
+            return JsonResponse({'postsList': postsList, 'hasNext': hasNext, 'hasPrevious': hasPrevious})
+        
+        
+        
+        
 
 
 

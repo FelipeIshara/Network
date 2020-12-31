@@ -1,3 +1,6 @@
+body {
+  background-color: blue; }
+
 .unstyle-btn {
   background: none;
   color: inherit;
@@ -5,8 +8,5 @@
   font: inherit;
   cursor: pointer;
   outline: inherit; }
-
-body {
-  background-color: black; }
 
 /*# sourceMappingURL=styles.css.map */

@@ -126,7 +126,7 @@ def get_posts(request, pagetype, pagenumber, profileusername = None):
 
 
 
-def profileData(request, username):
+def followers_data(request, username):
     #querying user
     profile = User.objects.get(username=username)
     # query following = list(profile.following.all().values())

@@ -1,7 +1,7 @@
 // get the logged user
 let loggedUser = JSON.parse(document.getElementById('hello-data').textContent);
-console.log(loggedUser)
 
+// Navigation
 document.addEventListener('DOMContentLoaded', function() {
     if (loggedUser.username === "AnonymousUser"){
         
@@ -17,10 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-/* to acess profile pages, this function has to be called with
-user-profile as an argument and the username as second argument*/
+// load content 
 function loadPageContent(page, profileUsername=null){
-    
+    console.log(page)
 
     if (page === "all"){
         document.querySelector('#following-page').style.display = "none"
@@ -55,7 +54,7 @@ function loadPageContent(page, profileUsername=null){
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "block"
         
-        fetch(`/profile/${profileUsername}`).then(response => response.json()).then(profile => {
+        fetch(`/profile/followers/${profileUsername}`).then(response => response.json()).then(profile => {
             document.querySelector('#profileTitle').innerHTML = `${profileUsername} - Profile`
             //Follow and Unfollow btn event
             const followBtn = document.querySelector('#follow-btn')
@@ -90,8 +89,42 @@ function loadPageContent(page, profileUsername=null){
     
 }
 
+function grabPageOfPosts(pageType, pageNumber, profileUsername=null){
+    console.log(`grabbing ${pageType} posts, page:${pageNumber}`)
+    //clear all posts
+    const PostsDiv = document.querySelector(`#${pageType}-posts-div`)
+    PostsDiv.innerHTML = ""
+    
+    
+    if (profileUsername){
+        fetch(`getposts/${pageType}/${pageNumber}/${profileUsername}`).then(response => response.json()).then(page => {
+            page.postsList.forEach(post => {
+                    //create html for each post
+                    let postDiv = createHtmlforPost(post, pageType)
+                    //add the created div to allPostDiv(page)
+                    PostsDiv.append(postDiv)
+                }
+            );
+            // set up Pagination
+            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber, profileUsername)
+        });
+    } else {
+        fetch(`getposts/${pageType}/${pageNumber}`).then(response => response.json()).then(page => {
+            page.postsList.forEach(post => {
+                    //create html for each post
+                    let postDiv = createHtmlforPost(post, pageType, profileUsername)
+                    //add the created div to allPostDiv(page)
+                    PostsDiv.append(postDiv)
+                }
+            );
+            // set up Pagination
+            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber)
+        });
+    }
+}
+
 //create html for each post 
-function createHtmlforPost(post){
+function createHtmlforPost(post, pageType, profileUsername=null){
     //div for post
     postDiv = document.createElement('div')
 
@@ -105,8 +138,7 @@ function createHtmlforPost(post){
     usernameDiv.append(profileLink)
     
 
-
-    //html for content, date and likes
+    //html for content and  date
     const contentDiv = document.createElement('div')
     contentDiv.innerHTML = post.content
     const dateDiv = document.createElement('div')
@@ -114,13 +146,13 @@ function createHtmlforPost(post){
     let newDateTime = post.date.split('T')
     dateparcial = newDateTime[0].split('-')
     timeparcial = newDateTime[1].split('.')[0].split(':')
-
     dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]}/${dateparcial[2]} - ${timeparcial[0]}:${timeparcial[1]}`
+    
+    //likes 
     const likesDiv = document.createElement('div')
-    
     likesDiv.innerHTML = `Likes: ${post.likes}`
-    
-    if(!loggedUser.username === "AnonymousUser"){
+    // if the user is authenticated, give a edit or a like btn
+    if(loggedUser.username !== "AnonymousUser"){
         if (post.owner === loggedUser.username){
             const editBtn = document.createElement('button')
             editBtn.innerHTML = "Edit"
@@ -135,31 +167,27 @@ function createHtmlforPost(post){
             }
             postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, editBtn)
         } else {
-            
             const likeBtn = document.createElement('button')
             if (post.userAlreadyLike){
                 likeBtn.innerHTML = "UnLike"
             } else {
                 likeBtn.innerHTML = "Like"
             }
-            
-            
-            likeBtn.onclick = () => likePost(post.id)
+            console.log(pageType)
+            likeBtn.onclick = () => likePost(post.id, pageType, profileUsername)
             postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
         }
     } else {
         postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv)
     }
-    // Edit Btn
     
-
     postDiv.style.display = "flex"
     
     return postDiv
-
 }
 
-function likePost(postId){
+//like/unlike 
+function likePost(postId, pageType, profileUsername){
     const csrftoken = getCookie('csrftoken');
     const headers = new Headers();
     headers.append('X-CSRFToken', csrftoken)
@@ -167,11 +195,11 @@ function likePost(postId){
         headers: headers,  
         method: 'POST'
     }).then(response => response.json()).then(result => {
-        loadPageContent('all');
+        console.log(pageType);
+        loadPageContent(pageType, profileUsername);
         console.log(result);
     });
 }
-
 
 function updatePost(postId){
     const csrftoken = getCookie('csrftoken');
@@ -190,7 +218,6 @@ function updatePost(postId){
         console.log(result);
     });
 }
-
 
 //set up post form
 function sendPost(csrftoken){
@@ -223,9 +250,6 @@ function follow(csrftoken, username){
     });
 }
 
-
-
-
 //get cookie
 function getCookie(name) {
     let cookieValue = null;
@@ -244,39 +268,7 @@ function getCookie(name) {
 }
 
 
-function grabPageOfPosts(pageType, pageNumber, profileUsername=null){
-    console.log(`grabbing ${pageType} posts, page:${pageNumber}`)
-    //clear all posts
-    const PostsDiv = document.querySelector(`#${pageType}-posts-div`)
-    PostsDiv.innerHTML = ""
-    
-    
-    if (profileUsername){
-        fetch(`getposts/${pageType}/${pageNumber}/${profileUsername}`).then(response => response.json()).then(page => {
-            page.postsList.forEach(post => {
-                    //create html for each post
-                    let postDiv = createHtmlforPost(post)
-                    //add the created div to allPostDiv(page)
-                    PostsDiv.append(postDiv)
-                }
-            );
-            // set up Pagination
-            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber, profileUsername)
-        });
-    } else {
-        fetch(`getposts/${pageType}/${pageNumber}`).then(response => response.json()).then(page => {
-            page.postsList.forEach(post => {
-                    //create html for each post
-                    let postDiv = createHtmlforPost(post)
-                    //add the created div to allPostDiv(page)
-                    PostsDiv.append(postDiv)
-                }
-            );
-            // set up Pagination
-            setPagination(pageType, page.hasNext, page.hasPrevious, pageNumber)
-        });
-    }
-}
+
 
 function setPagination(pageType, hasNext, hasPrevious, pageNumber, profileUsername=null){
     if (hasPrevious){

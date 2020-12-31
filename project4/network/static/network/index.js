@@ -1,3 +1,4 @@
+//teste
 // get the logged user
 let loggedUser = JSON.parse(document.getElementById('hello-data').textContent);
 
@@ -185,6 +186,7 @@ function createHtmlforPost(post, pageType, profileUsername=null){
     
     return postDiv
 }
+
 // like
 //like/unlike 
 function likePost(postId, pageType, profileUsername){

@@ -92,7 +92,6 @@ def register(request):
         return render(request, "network/register.html")
 
 
-
 def get_posts(request, pagetype, pagenumber, profileusername = None):
     if pagetype == "all":
         postsQuery = list(Post.objects.order_by("-date"))
@@ -123,8 +122,6 @@ def get_posts(request, pagetype, pagenumber, profileusername = None):
     return JsonResponse({'postsList': postsList, 'hasNext': hasNext, 'hasPrevious': hasPrevious}) 
 
         
-
-
 
 def followers_data(request, username):
     #querying user

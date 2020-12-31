@@ -1,0 +1,25 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+
+//Clear defalt Btns Style
+.unstyle-btn{
+    background: none;
+    color: inherit;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+$text-primary: #b6b6b6;
+$text-secondary: #ececec;
+$bg-primary: #23232e;
+$bg-secondary: #141418;
+$transition-speed: 600ms;
+
+:root {
+	font-size: 16px;
+	
+  }

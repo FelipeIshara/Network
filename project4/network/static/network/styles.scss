@@ -1,13 +1,16 @@
+@import './resets';
 @import './navbar';
 
-.unstyle-btn{
-	background: none;
-	color: inherit;
-	border: none;
-	font: inherit;
-	cursor: pointer;
-	outline: inherit;
+
+
+main{
+	margin-left: 5rem;
+	padding: 1rem;
+	transition: margin-left 200ms ease;
 }
 
+#nav-bar:hover + main{
+	margin-left: 16rem;
+}
 
 

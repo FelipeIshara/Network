@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // load content 
 function loadPageContent(page, profileUsername=null){
-    console.log(page)
-
     if (page === "all"){
         document.querySelector('#following-page').style.display = "none"
         document.querySelector('#profile-page').style.display = "none"
@@ -91,7 +89,6 @@ function loadPageContent(page, profileUsername=null){
 }
 
 function grabPageOfPosts(pageType, pageNumber, profileUsername=null){
-    console.log(`grabbing ${pageType} posts, page:${pageNumber}`)
     //clear all posts
     const PostsDiv = document.querySelector(`#${pageType}-posts-div`)
     PostsDiv.innerHTML = ""
@@ -174,7 +171,6 @@ function createHtmlforPost(post, pageType, profileUsername=null){
             } else {
                 likeBtn.innerHTML = "Like"
             }
-            console.log(pageType)
             likeBtn.onclick = () => likePost(post.id, pageType, profileUsername)
             postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
         }

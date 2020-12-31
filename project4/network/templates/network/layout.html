@@ -9,48 +9,56 @@
         {% block script %}
         {% endblock %}
         <link href="{% sass_src 'network/styles.scss' %}" rel="stylesheet" type="text/css" />
+        <script src="https://kit.fontawesome.com/89c4ef0c32.js" crossorigin="anonymous"></script>
     </head>
     <body>
-        <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Network</a>
-            
-              <ul class="navbar-nav">
-                {% if request.user.is_superuser %}
+        <nav id="nav-bar">
+            <ul>
+                <!--{% if request.user.is_superuser %}
                 <li class="nav-item">
                     <a class="nav-link" href="http://127.0.0.1:8000/admin/">Admin</a>
-                </li>
-                {% endif %}  
-                {% if user.is_authenticated %}
+                </li>-->
+                {% endif %}
+                {% if user.is_authenticated %}  
                 <li class="nav-item">
-                    <button id="user" class="unstyle-btn nav-link">{{ user.username }}</button>
-                </li>
-                <li class="nav-item">
-                    <button id="allposts" class=" unstyle-btn nav-link" >All Posts</button>
-                </li>
-                <li class="nav-item">
-                    <button id="following" class="unstyle-btn nav-link" >Following</button>
+                    <button class="unstyle-btn" id="allposts">
+                        <i class="fas fa-list-alt"></i>
+                        <span class="link-text">All Posts</span>
+                    </button>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    <button class="unstyle-btn" id="user">
+                        <i class="fas fa-id-card"></i>
+                        <span class="link-text">{{ user.username.capitalize }} - Profile</span>
+                    </button></li>
+                <li class="nav-item">
+                    <button class="unstyle-btn" id="following">
+                        <i class="fas fa-user-friends"></i>
+                        <span class="link-text">Following</span>
+                    </button>
+                    
+                </li>
+                <li class="nav-item">
+                    <a class="unstyle-btn" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="link-text">Log Out</span>
+                    </a>
+                    
                 </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">All Posts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
-                {% endif %}
-              </ul>
-            
+                <li class="nav-item"><a class="unstyle-btn" href="http://127.0.0.1:8000/admin/"></a>Admin</li>
+                <li class="nav-item"><a class="unstyle-btn" href="{% url 'index' %}"></a>Home</li>
+                <li class="nav-item"><a class="unstyle-btn" href="{% url 'login' %}"></a>Login</li>
+                <li class="nav-item"><a class="unstyle-btn" href="{% url 'register' %}"></a>Register</li>
+                
+                {% endif %}  
+            </ul>
         </nav>
-        
-        <div class="body">
-            {% block body %}
-            {% endblock %}
-        </div>
+        <main>
+            <div class="body">
+                {% block body %}
+                {% endblock %}
+            </div>
+        </main>
     </body>
 </html>

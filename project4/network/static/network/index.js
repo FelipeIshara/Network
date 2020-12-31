@@ -185,7 +185,7 @@ function createHtmlforPost(post, pageType, profileUsername=null){
     
     return postDiv
 }
-
+// like
 //like/unlike 
 function likePost(postId, pageType, profileUsername){
     const csrftoken = getCookie('csrftoken');
@@ -196,6 +196,7 @@ function likePost(postId, pageType, profileUsername){
         method: 'POST'
     }).then(response => response.json()).then(result => {
         console.log(pageType);
+        //reload page posts
         loadPageContent(pageType, profileUsername);
         console.log(result);
     });

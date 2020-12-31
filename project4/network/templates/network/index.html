@@ -3,30 +3,32 @@
 
 {% block body %}
     <div id="allposts-page">
-        <h3>All Posts</h3>
+        <div class="title">
+            <h3>Home Page</h3>
+        </div>
         {% if user.is_authenticated %}
-        <div class="createpost-div">
+        <div id="createpost-div">
             <form id="newpost-form">
-            <label for="content">Post:</label>
-            <textarea name="content" id="post-content" cols="30" rows="10"></textarea>
+            <label for="content"></label>
+            <textarea placeholder="{{ user.username.capitalize }}, people want to see your next post" name="content" id="post-content" cols="30" rows="10"></textarea>
             <input class="create-btn-form btn btn-primary" type="submit" value="Submit">            
             </form>
         </div>
         {% endif %}
-        <div id="all-posts-div">
+        <div class="posts-div" id="all-posts-div">
             
         </div>
     </div>
     <div id="following-page">
-        <h3>Following</h3>
-        <div id="following-posts-div"></div>
+        <h3>Following User´s</h3>
+        <div class="posts-div" id="following-posts-div"></div>
     </div>
     <div id="profile-page">
         <h3 id="profileTitle"></h3>
         <button type="submit" id="follow-btn"></button>
         <div id="profile-followers"></div>
         <div id="profile-following"></div>
-        <div id="profile-posts-div"></div>
+        <div class="posts-div" id="profile-posts-div"></div>
     </div>
     <div class="pagination">
         <button id="previousBtn">Previous</button>

@@ -1,0 +1,36 @@
+#createpost-div{
+    padding: 50px;
+    background-color: $bg-primary;
+    border-bottom: 1px solid $border-color;
+    #newpost-form{
+        display: flex;
+        flex-direction: column;
+        margin-right: 500px;
+        text-align: left;
+        height: 150px;
+        justify-content: center;
+        
+        textarea{
+            background-color: $bg-primary;
+            height: 80px;
+            margin-left: 2rem;
+            width: 400px;
+            border: none;
+            border-bottom: 1px solid $border-color;
+            border-right: 1px solid $border-color;
+            color: white;
+        }
+        textarea::placeholder{
+            color: #6b99a6;
+            font-size: 1.5rem;
+        }
+        .create-btn-form{
+            font-weight: 700;
+            background-color: #1da1f2;
+            width: 100px;
+            border-radius: 20px;
+            margin-left: 320px;
+            margin-top: 10px;
+        }
+    }
+}

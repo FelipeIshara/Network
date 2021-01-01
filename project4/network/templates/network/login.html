@@ -1,4 +1,6 @@
 {% extends "network/layout.html" %}
+{% load static %}
+
 
 {% block body %}
 
@@ -21,4 +23,20 @@
 
     Don't have an account? <a href="{% url 'register' %}">Register here.</a>
 
+{% endblock %}
+
+
+{% block script %}
+<script id="hello-data" type="application/json">{"username": "{{request.user}}"}</script>
+<script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
+
+{% block style %}
+<style>
+
+
+    
+    
+
+</style>        
 {% endblock %}

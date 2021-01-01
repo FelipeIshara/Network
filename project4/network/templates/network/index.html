@@ -1,6 +1,8 @@
 {% extends "network/layout.html" %}
 {% load static %}
 
+
+
 {% block body %}
     <div id="allposts-page">
         <div class="title">
@@ -20,19 +22,21 @@
         </div>
     </div>
     <div id="following-page">
-        <h3>Following User´s</h3>
+        <div class="title"><h3>Following Users Posts</h3></div>
         <div class="posts-div" id="following-posts-div"></div>
     </div>
     <div id="profile-page">
-        <h3 id="profileTitle"></h3>
+        <div class="title" id="profile-title"><h3 id="profileTitle"></h3></div>
         <button type="submit" id="follow-btn"></button>
+        <div class="follow-div">
         <div id="profile-followers"></div>
         <div id="profile-following"></div>
+        </div>
         <div class="posts-div" id="profile-posts-div"></div>
     </div>
     <div class="pagination">
-        <button id="previousBtn">Previous</button>
-        <button id="nextBtn">Next</button>
+        <button id="previousBtn" class="btn btn-primary" >Previous</button>
+        <button id="nextBtn" class="btn btn-primary next">Next</button>
     </div>
 {% endblock %}
 

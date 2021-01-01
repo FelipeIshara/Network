@@ -21,4 +21,34 @@ main{
 	margin-left: 16rem;
 }
 
+body{
+	background-color: #192734;
+}
+
+.pagination{
+	display: flex;
+	justify-content: space-between;
+	.next{
+		margin-left: auto;
+	}
+}
+
+.follow-div{
+	display: flex;
+	justify-content: space-around;
+}
+
+#profile-title{
+	display: flex;
+	justify-content: space-around;
+	#follow-btn{
+			color: white ;
+			font-weight: 700;
+            background-color: $bg-primary;
+            width: 100px;
+            border-radius: 20px;
+            margin-left: 320px;
+            margin-top: 10px;
+	}
+}
 

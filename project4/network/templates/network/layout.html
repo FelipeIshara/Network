@@ -6,18 +6,21 @@
     <head>
         <title>{% block title %}Social Network{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% sass_src 'network/styles.scss' %}" rel="stylesheet" type="text/css" />
+        {% block style %}
+        {% endblock %}
         {% block script %}
         {% endblock %}
-        <link href="{% sass_src 'network/styles.scss' %}" rel="stylesheet" type="text/css" />
         <script src="https://kit.fontawesome.com/89c4ef0c32.js" crossorigin="anonymous"></script>
     </head>
     <body>
         <nav id="nav-bar">
-            <ul>
-                <!--{% if request.user.is_superuser %}
+            <ul id="nav-bar-ul">
+                {% if request.user.is_superuser %}
                 <li class="nav-item">
                     <a class="nav-link" href="http://127.0.0.1:8000/admin/">Admin</a>
-                </li>-->
+                </li>
+            
                 {% endif %}
                 {% if user.is_authenticated %}  
                 <li class="nav-item">
@@ -46,11 +49,10 @@
                     
                 </li>
                 {% else %}
-                <li class="nav-item"><a class="unstyle-btn" href="http://127.0.0.1:8000/admin/"></a>Admin</li>
-                <li class="nav-item"><a class="unstyle-btn" href="{% url 'index' %}"></a>Home</li>
-                <li class="nav-item"><a class="unstyle-btn" href="{% url 'login' %}"></a>Login</li>
-                <li class="nav-item"><a class="unstyle-btn" href="{% url 'register' %}"></a>Register</li>
                 
+                <li class="nav-item"><a class="unstyle-btn login" href="{% url 'index' %}"><i class="fas fa-home"></i><span class="link-text">Home</span></a></li>
+                <li class="nav-item"><a class="unstyle-btn login" href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i></i><span class="link-text">Login</span></a></li>
+                <li class="nav-item"><a class="unstyle-btn login" href="{% url 'register' %}"><i class="fas fa-registered"></i><span class="link-text">Register</span></a></li>
                 {% endif %}  
             </ul>
         </nav>

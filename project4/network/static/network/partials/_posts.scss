@@ -1,7 +1,77 @@
 .posts-div{
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     font-size: 20px;
+    .edit-textarea{
+        background-color: inherit;
+        color: white;       
+    }
+    .postDiv{
+        display: flex;
+        flex-direction: column;
+        
+        margin: 10px 10px;
+        padding: 10px;
+        background-color: $bg-primary;
+        width: 45%;
+        border-bottom: 1px solid $border-color;
+        border-top: 1px solid $border-color;
+        border-right: 1px solid $border-color;
+        border-radius: 20px;
+        min-height: 100px;
+        .username-date{
+            display: flex;
+            justify-content: space-between;
+            .username-div{
+                
+                font-size: 0.9rem;
+            }
+            .username-div:hover button{
+                text-decoration: underline;
+            }
+            .date-div{
+                color: $text-primary;
+                font-size: 0.8rem;
+                line-height: 10px;
+            }
+        }
+        .content-div{
+            margin: 0 auto;
+            width: 90%;
+            font-size: 1.2;
+            text-indent: 20px;
+            
+        }
+        .likes-div{
+            display: flex;
+            justify-content: end;
+        }
+        .btn{
+            margin-left: auto;
+            font-weight: 700;
+            width: 100px;
+            border-radius: 20px;
+            color: white;
+        }
+        .btn:hover{
+            font-weight: 900;
+            border: 1px white solid;
+        }
+        .edit{
+            width: 100px;
+            
+            margin-left: 0;
+            
+            
+        }
+        .like{
+            background-color: #1da1f2;
+        }
+        
+    }
+    .postDiv:hover{
+        background-color: rgba($color: #ffffff, $alpha: 0.03)
+    }
 }

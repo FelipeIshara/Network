@@ -69,7 +69,8 @@ function loadPageContent(page, profileUsername=null){
                 }
                  //get cookie
                  const csrftoken = getCookie('csrftoken');
-                 document.querySelector('#follow-btn').onclick = () => follow(csrftoken, profileUsername)
+                 followBtn.onclick = () => follow(csrftoken, profileUsername)
+                 document.querySelector('#profile-title').append(followBtn)
             
             }
             
@@ -125,57 +126,77 @@ function grabPageOfPosts(pageType, pageNumber, profileUsername=null){
 function createHtmlforPost(post, pageType, profileUsername=null){
     //div for post
     postDiv = document.createElement('div')
+    postDiv.setAttribute("class", "postDiv")
 
-    //html for username and profile button
+    const usernameAndDateDiv = document.createElement('div')
+    usernameAndDateDiv.setAttribute("class", "username-date")
+    //html for username 
     const usernameDiv = document.createElement('div')
-    const profileLink = document.createElement('button')
+    usernameDiv.setAttribute("class", "post-item username-div")
     
-    profileLink.setAttribute("class", "unstyle-btn profilelink")
-    profileLink.innerHTML = post.owner
-    profileLink.addEventListener("click", () => loadPageContent("profile", post.owner))
-    usernameDiv.append(profileLink)
     
-
-    //html for content and  date
-    const contentDiv = document.createElement('div')
-    contentDiv.innerHTML = post.content
+    //and  date
     const dateDiv = document.createElement('div')
-    
+    dateDiv.setAttribute("class", "post-item date-div")
     let newDateTime = post.date.split('T')
     dateparcial = newDateTime[0].split('-')
     timeparcial = newDateTime[1].split('.')[0].split(':')
-    dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]}/${dateparcial[2]} - ${timeparcial[0]}:${timeparcial[1]}`
+    dateDiv.innerHTML = `${dateparcial[0]}/${dateparcial[1]} - ${timeparcial[0]}:${timeparcial[1]}`
+
+    //and profile button
+    const profileLink = document.createElement('button')
+    profileLink.setAttribute("class", "unstyle-btn profilelink")
+    profileLink.innerHTML = `@${post.owner}:`
+    profileLink.addEventListener("click", () => loadPageContent("profile", post.owner))
+    usernameDiv.append(profileLink)
+
+    usernameAndDateDiv.append(usernameDiv, dateDiv)
+
+    
+    
+
+    //html for content 
+    const contentDiv = document.createElement('div')
+    contentDiv.setAttribute("class", "content-div")
+    contentDiv.innerHTML = post.content
+    
+    
     
     //likes 
     const likesDiv = document.createElement('div')
-    likesDiv.innerHTML = `Likes: ${post.likes}`
+    likesDiv.setAttribute("class", "likes-div")
+    likesDiv.innerHTML = `<i class="fas fa-heart"></i> ${post.likes}`
     // if the user is authenticated, give a edit or a like btn
     if(loggedUser.username !== "AnonymousUser"){
         if (post.owner === loggedUser.username){
             const editBtn = document.createElement('button')
+            editBtn.setAttribute("class", "btn edit")
             editBtn.innerHTML = "Edit"
             editBtn.onclick = () => {
                 contentDiv.innerHTML = ""
                 textAreaForPost = document.createElement('textarea')
+                textAreaForPost.setAttribute("class", "edit-textarea")
                 textAreaForPost.innerHTML = post.content
                 contentDiv.append(textAreaForPost)
                 editBtn.innerHTML = "Update"
                 textAreaForPost.setAttribute('name', 'updatecontent')
                 editBtn.onclick = () => updatePost(post.id)
             }
-            postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, editBtn)
+            postDiv.append(usernameAndDateDiv, contentDiv, likesDiv, editBtn)
         } else {
             const likeBtn = document.createElement('button')
+            likeBtn.setAttribute("class", "btn unlike unstylebtn")
             if (post.userAlreadyLike){
-                likeBtn.innerHTML = "UnLike"
+                likeBtn.innerHTML = `<i class="fas fa-heart"></i> ${post.likes}`
             } else {
-                likeBtn.innerHTML = "Like"
+                likeBtn.innerHTML = `<i class="far fa-heart"></i> ${post.likes}`
+                likeBtn.setAttribute("class", "btn unlike")
             }
             likeBtn.onclick = () => likePost(post.id, pageType, profileUsername)
-            postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv, likeBtn)
+            postDiv.append(usernameAndDateDiv, contentDiv, likeBtn)
         }
     } else {
-        postDiv.append(usernameDiv, contentDiv, dateDiv, likesDiv)
+        postDiv.append(usernameAndDateDiv, contentDiv, likesDiv)
     }
     
     postDiv.style.display = "flex"
